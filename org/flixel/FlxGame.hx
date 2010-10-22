@@ -46,8 +46,8 @@ package org.flixel;
 		//Flex v3.x SDK only (see note above):
 		//[Embed(source="data/nokiafc22.ttf",fontFamily="system")] protected var junk:String;
 		
-		/*[Embed(source="data/beep.mp3")]*/ var SndBeep:Class<Dynamic>;
-		/*[Embed(source="data/flixel.mp3")]*/ var SndFlixel:Class<Dynamic>;
+		/*[Embed(source="data/beep.mp3")]*/ //var SndBeep:Class<Sound>;
+		/*[Embed(source="data/flixel.mp3")]*/ //var SndFlixel:Class<Sound>;
 
 		/**
 		 * Sets 0, -, and + to control the global volume and P to pause.
@@ -151,7 +151,7 @@ package org.flixel;
 		public function showSoundTray(?Silent:Bool=false):Void
 		{
 			if(!Silent)
-				FlxG.play(SndBeep);
+				FlxG.playRessy("flixel.beep");
 			_soundTrayTimer = 1;
 			_soundTray.y = _gameYOffset*_zoom;
 			_soundTray.visible = true;
@@ -505,4 +505,3 @@ package org.flixel;
 			addEventListener(Event.ENTER_FRAME, update);
 		}
 	}
-	// add this line :D

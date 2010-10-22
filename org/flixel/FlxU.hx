@@ -48,8 +48,7 @@ package org.flixel;
 		 */
 		public static function openURL(URL:String):Void
 		{
-//TODO: get url navigation working in haxe
-//			navigateToURL(new URLRequest(URL), "_blank");
+			flash.Lib.getURL(new URLRequest(URL), "_blank");
 		}
 		
 		public static function abs(N:Float):Float

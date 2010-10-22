@@ -4,6 +4,7 @@ package org.flixel;
 	import flash.display.Stage;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
+	import flash.media.Sound;
 	
 	import org.flixel.data.FlxMouse;
 	import org.flixel.data.FlxKeyboard;
@@ -12,6 +13,8 @@ package org.flixel;
 	import org.flixel.data.FlxQuake;
 	import org.flixel.data.FlxFlash;
 	import org.flixel.data.FlxFade;
+
+	import ressy.Ressy;
 	
 	/**
 	 * This is a global helper class full of useful functions for audio,
@@ -202,6 +205,17 @@ package org.flixel;
 		}
 		
 		/**
+		 * To automatically call log when we trace.
+		 */
+		/*public static function trace2log():Void
+		{
+			haxe.Log.trace = function( v : Dynamic, ?infos : haxe.PosInfos )
+			{
+				FlxG.log(((infos == null)? "(null)" : infos.fileName+":"+infos.lineNumber) + ": " + v);	
+			};
+		}*/
+		
+		/**
 		 * Set <code>pause</code> to true to pause the game, all sounds, and display the pause popup.
 		 */
 		public static function getPause():Bool{
@@ -297,7 +311,7 @@ package org.flixel;
 		 * @param	Music		The sound file you want to loop in the background.
 		 * @param	Volume		How loud the sound should be, from 0 to 1.
 		 */
-		public static function playMusic(Music:Class<Dynamic>,?Volume:Float=1.0):Void
+		public static function playMusic(Music:Class<Sound>,?Volume:Float=1.0):Void
 		{
 			if(music == null)
 				music = new FlxSound();
@@ -307,6 +321,35 @@ package org.flixel;
 			music.volume = Volume;
 			music.survive = true;
 			music.play();
+		}
+
+		/**
+		 * Set up and play a looping background soundtrack.
+		 * 
+		 * @param	MusicIns		The sound file you want to loop in the background.
+		 * @param	Volume		How loud the sound should be, from 0 to 1.
+		 */
+		public static function playMusicIns(MusicIns:Sound,?Volume:Float=1.0):Void
+		{
+			if(music == null)
+				music = new FlxSound();
+			else if(music.active)
+				music.stop();
+			music.loadInstance(MusicIns,true);
+			music.volume = Volume;
+			music.survive = true;
+			music.play();
+		}
+
+		/**
+		 * Set up and play a looping background soundtrack.
+		 * 
+		 * @param	Path		The sound file you want to loop in the background with Ressy.
+		 * @param	Volume		How loud the sound should be, from 0 to 1.
+		 */
+		public static function playMusicRessy(Path:String,?Volume:Float=1.0):Void
+		{
+			playMusicIns(Ressy.instance.getStr(Path), volume);
 		}
 		
 		/**
@@ -318,7 +361,7 @@ package org.flixel;
 		 * 
 		 * @return	A <code>FlxSound</code> object.
 		 */
-		public static function play(EmbeddedSound:Class<Dynamic>,?Volume:Float=1.0,?Looped:Bool=false):FlxSound
+		public static function play(EmbeddedSound:Class<Sound>,?Volume:Float=1.0,?Looped:Bool=false):FlxSound
 		{
 			var sl:Int = sounds.length;
 			var index:Int = -1;
@@ -335,6 +378,48 @@ package org.flixel;
 			s.volume = Volume;
 			s.play();
 			return s;
+		}
+
+		/**
+		 * Creates a new sound object from an instance.
+		 * 
+		 * @param	InstanceSound	The sound you want to play.
+		 * @param	Volume			How loud to play it (0 to 1).
+		 * @param	Looped			Whether or not to loop this sound.
+		 * 
+		 * @return	A <code>FlxSound</code> object.
+		 */
+		public static function playIns(InstanceSound:Sound,?Volume:Float=1.0,?Looped:Bool=false):FlxSound
+		{
+			var sl:Int = sounds.length;
+			var index:Int = -1;
+			for (i in 0 ... sl) {
+				if(!(cast( sounds[i], FlxSound)).active) {
+					break;
+					index = i;
+				}
+			}
+			if(sounds[index] == null)
+				sounds[index] = new FlxSound();
+			var s:FlxSound = sounds[index];
+			s.loadInstance(InstanceSound,Looped);
+			s.volume = Volume;
+			s.play();
+			return s;
+		}
+
+		/**
+		 * Creates a new sound object from an instance.
+		 * 
+		 * @param	Path	The sound you want to play.
+		 * @param	Volume			How loud to play it (0 to 1).
+		 * @param	Looped			Whether or not to loop this sound.
+		 * 
+		 * @return	A <code>FlxSound</code> object.
+		 */
+		public static function playRessy(Path:String,?Volume:Float=1.0,?Looped:Bool=false):FlxSound
+		{
+			return playIns(Ressy.instance.getStr(Path));
 		}
 		
 		/**

@@ -90,6 +90,26 @@ package org.flixel;
 		}
 		
 		/**
+		 * Load sound from Sound Instance
+		 * 
+		 * @param	InstanceSound	An instance of Sound class
+		 * @param	Looped			Whether or not this sound should loop endlessly.
+		 * 
+		 * @return	This <code>FlxSound</code> instance (nice for chaining stuff together, if you're into that).
+		 */
+		public function loadInstance(InstanceSound:Sound, ?Looped:Bool=false):FlxSound
+		{
+			stop();
+			init();
+			_sound = InstanceSound;
+			//NOTE: can't pull ID3 info from embedded sound currently
+			_looped = Looped;
+			updateTransform();
+			active = true;
+			return this;
+		}
+		
+		/**
 		 * One of two main setup functions for sounds, this function loads a sound from an embedded MP3.
 		 * 
 		 * @param	EmbeddedSound	An embedded Class object representing an MP3 file.
@@ -97,16 +117,9 @@ package org.flixel;
 		 * 
 		 * @return	This <code>FlxSound</code> instance (nice for chaining stuff together, if you're into that).
 		 */
-		public function loadEmbedded(EmbeddedSound:Class<Dynamic>, ?Looped:Bool=false):FlxSound
+		public function loadEmbedded(EmbeddedSound:Class<Sound>, ?Looped:Bool=false):FlxSound
 		{
-			stop();
-			init();
-			_sound = Type.createInstance(EmbeddedSound, []);
-			//NOTE: can't pull ID3 info from embedded sound currently
-			_looped = Looped;
-			updateTransform();
-			active = true;
-			return this;
+			return loadInstance(Type.createInstance(EmbeddedSound, []), Looped);
 		}
 		
 		/**
