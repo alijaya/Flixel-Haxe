@@ -505,3 +505,4 @@ package org.flixel;
 			addEventListener(Event.ENTER_FRAME, update);
 		}
 	}
+	// add this line :D
