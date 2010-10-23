@@ -85,7 +85,7 @@ import flash.display.Bitmap;
 		public var frameHeight:Int;
 		
 		//Animation helpers
-		var _animations:Array<Dynamic>;
+		var _animations:Array<FlxAnim>;
 		var _flipped:Int;
 		var _curAnim:FlxAnim;
 		var _curFrame:Int;
@@ -115,7 +115,7 @@ import flash.display.Bitmap;
 		 * @param	Y				The initial Y position of the sprite.
 		 * @param	SimpleGraphic	The graphic you want to display (OPTIONAL - for simple stuff only, do NOT use for animated images!).
 		 */
-		public function new(?X:Int=0,?Y:Int=0,?SimpleGraphic:Class<Dynamic>=null)
+		public function new(?X:Float=0,?Y:Float=0,?SimpleGraphic:Class<Bitmap>=null)
 		{
 			super();
 			x = X;
@@ -162,10 +162,53 @@ import flash.display.Bitmap;
 		 * 
 		 * @return	This FlxSprite instance (nice for chaining stuff together, if you're into that).
 		 */
-		public function loadGraphic(Graphic:Class<Dynamic>,?Animated:Bool=false,?Reverse:Bool=false,?Width:Int=0,?Height:Int=0,?Unique:Bool=false):FlxSprite
+		public function loadGraphic(Graphic:Class<Bitmap>,?Animated:Bool=false,?Reverse:Bool=false,?Width:Int=0,?Height:Int=0,?Unique:Bool=false):FlxSprite
 		{
 			_bakedRotation = 0;
 			_pixels = FlxG.addBitmap(Graphic,Reverse,Unique);
+			//TEMP NOTE: bitmap loads correctly up to this point at least
+			
+			if(Reverse)
+				_flipped = _pixels.width>>1;
+			else
+				_flipped = 0;
+			if(Width == 0)
+			{
+				if(Animated)
+					Width = _pixels.height;
+				else if(_flipped > 0)
+					Width = Math.floor(_pixels.width/2);
+				else
+					Width = Math.floor(_pixels.width);
+			}
+			width = frameWidth = Width;
+			if(Height == 0)
+			{
+				if(Animated)
+					Height = Math.floor(width);
+				else
+					Height = Math.floor(_pixels.height);
+			}
+			height = frameHeight = Height;
+			resetHelpers();
+			return this;
+		}
+
+		/**
+		 * Load an image from an embedded graphic file.
+		 * 
+		 * @param	GraphicIns		The image you want to use.
+		 * @param	Animated	Whether the Graphic parameter is a single sprite or a row of sprites.
+		 * @param	Reverse		Whether you need this class to generate horizontally flipped versions of the animation frames.
+		 * @param	Width		OPTIONAL - Specify the width of your sprite (helps FlxSprite figure out what to do with non-square sprites or sprite sheets).
+		 * @param	Height		OPTIONAL - Specify the height of your sprite (helps FlxSprite figure out what to do with non-square sprites or sprite sheets).
+		 * 
+		 * @return	This FlxSprite instance (nice for chaining stuff together, if you're into that).
+		 */
+		public function loadGraphicIns(GraphicIns:BitmapData, ?Animated:Bool=false,?Reverse:Bool=false,?Width:Int=0,?Height:Int=0):FlxSprite
+		{
+			_bakedRotation = 0;
+			_pixels = (Reverse)? FlxG.reverseBitmapData(GraphicIns) : GraphicIns;
 			//TEMP NOTE: bitmap loads correctly up to this point at least
 			
 			if(Reverse)
@@ -206,7 +249,7 @@ import flash.display.Bitmap;
 		 * 
 		 * @return	This FlxSprite instance (nice for chaining stuff together, if you're into that).
 		 */
-		public function loadRotatedGraphic(Graphic:Class<Dynamic>, ?Rotations:Int=16, ?Frame:Int=-1, ?AntiAliasing:Bool=false, ?AutoBuffer:Bool=false):FlxSprite
+		public function loadRotatedGraphic(Graphic:Class<Bitmap>, ?Rotations:Int=16, ?Frame:Int=-1, ?AntiAliasing:Bool=false, ?AutoBuffer:Bool=false):FlxSprite
 		{
 			//Create the brush and canvas
 			var rows:Int = Math.floor(Math.sqrt(Rotations));
@@ -251,7 +294,7 @@ import flash.display.Bitmap;
 			{
 				var r:Int;
 				var c:Int;
-				var ba:Int = 0;
+				var ba:Float = 0;
 				var bw2:Int = Math.floor(brush.width/2);
 				var bh2:Int = Math.floor(brush.height/2);
 				var gxc:Int = Math.floor(max/2);
@@ -264,7 +307,7 @@ import flash.display.Bitmap;
 						_mtx.translate(-bw2,-bh2);
 						_mtx.rotate(Math.PI * 2 * (ba / 360));
 						_mtx.translate(max*c+gxc, gyc);
-						ba += Math.floor(_bakedRotation);
+						ba += _bakedRotation;
 						_pixels.draw(brush,_mtx,null,null,null,AntiAliasing);
 					}
 					gyc += max;
@@ -623,7 +666,7 @@ import flash.display.Bitmap;
 		 * @param	FrameRate	The speed in frames per second that the animation should play at (e.g. 40 fps).
 		 * @param	Looped		Whether or not the animation is looped or just plays once.
 		 */
-		public function addAnimation(Name:String, Frames:Array<Dynamic>, ?FrameRate:Int=0, ?Looped:Bool=true):Void
+		public function addAnimation(Name:String, Frames:Array<Int>, ?FrameRate:Float=0, ?Looped:Bool=true):Void
 		{
 			_animations.push(new FlxAnim(Name,Frames,FrameRate,Looped));
 		}

@@ -1,5 +1,7 @@
 package org.flixel.data;
 
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.events.MouseEvent;
 	
 	import org.flixel.FlxPoint;
@@ -13,7 +15,7 @@ package org.flixel.data;
 	class FlxMouse
 	 {
 		
-		/*[Embed(source="cursor.png")]*/ var ImgDefaultCursor:Class<Dynamic>;
+		/*[Embed(source="cursor.png")]*/ //var ImgDefaultCursor:Class<Bitmap>;
 		
 		/**
 		 * Current X position of the mouse pointer in the game world.
@@ -47,6 +49,8 @@ package org.flixel.data;
 		 * Helper for mouse visibility.
 		 */
 		var _out:Bool;
+
+		var _defaultCursor:BitmapData;
 		
 		/**
 		 * Constructor.
@@ -61,6 +65,8 @@ package org.flixel.data;
 			_last = 0;
 			cursor = null;
 			_out = false;
+
+			_defaultCursor = ressy.Ressy.instance.getStr("flixel.cursor").bitmapData;
 		}
 		
 		/**
@@ -70,7 +76,7 @@ package org.flixel.data;
 		 * @param	XOffset		The number of pixels between the mouse's screen position and the graphic's top left corner.
 		 * * @param	YOffset		The number of pixels between the mouse's screen position and the graphic's top left corner. 
 		 */
-		public function show(?Graphic:Class<Dynamic>=null,?XOffset:Int=0,?YOffset:Int=0):Void
+		public function show(?Graphic:Class<Bitmap>=null,?XOffset:Int=0,?YOffset:Int=0):Void
 		{
 			_out = true;
 			if(Graphic != null)
@@ -79,6 +85,24 @@ package org.flixel.data;
 				cursor.visible = true;
 			else
 				load(null);
+		}
+
+		/**
+		 * Either show an existing cursor or load a new one.
+		 * 
+		 * @param	Graphic		The image you want to use for the cursor.
+		 * @param	XOffset		The number of pixels between the mouse's screen position and the graphic's top left corner.
+		 * * @param	YOffset		The number of pixels between the mouse's screen position and the graphic's top left corner. 
+		 */
+		public function showIns(?Graphic:BitmapData=null,?XOffset:Int=0,?YOffset:Int=0):Void
+		{
+			_out = true;
+			if(Graphic != null)
+				loadIns(Graphic,XOffset,YOffset);
+			else if(cursor != null)
+				cursor.visible = true;
+			else
+				loadIns(null);
 		}
 		
 		/**
@@ -100,11 +124,31 @@ package org.flixel.data;
 		 * @param	XOffset		The number of pixels between the mouse's screen position and the graphic's top left corner.
 		 * * @param	YOffset		The number of pixels between the mouse's screen position and the graphic's top left corner. 
 		 */
-		public function load(Graphic:Class<Dynamic>,?XOffset:Int=0,?YOffset:Int=0):Void
+		public function load(Graphic:Class<Bitmap>,?XOffset:Int=0,?YOffset:Int=0):Void
 		{
 			if(Graphic == null)
-				Graphic = ImgDefaultCursor;
+			{
+				loadIns(null);
+				return;
+			}
 			cursor = new FlxSprite(screenX,screenY,Graphic);
+			cursor.offset.x = XOffset;
+			cursor.offset.y = YOffset;
+		}
+
+		/**
+		 * Load a new mouse cursor graphic
+		 * 
+		 * @param	Graphic		The image you want to use for the cursor.
+		 * @param	XOffset		The number of pixels between the mouse's screen position and the graphic's top left corner.
+		 * * @param	YOffset		The number of pixels between the mouse's screen position and the graphic's top left corner. 
+		 */
+		public function loadIns(Graphic:BitmapData,?XOffset:Int=0,?YOffset:Int=0):Void
+		{
+			if(Graphic == null)
+				Graphic = _defaultCursor;
+			cursor = new FlxSprite(screenX,screenY);
+			cursor.loadGraphicIns(Graphic);
 			cursor.offset.x = XOffset;
 			cursor.offset.y = YOffset;
 		}

@@ -56,13 +56,13 @@ package org.flixel;
 			return (N>0)?N:-N;
 		}
 		
-		public static function floor(N:Float):Float
+		public static function floor(N:Float):Int
 		{
 			var n:Int = Math.floor(N);
 			return (N>0)?(n):((n!=N)?(n-1):(n));
 		}
 		
-		public static function ceil(N:Float):Float
+		public static function ceil(N:Float):Int
 		{
 			var n:Int = Math.floor(N);
 			return (N>0)?((n!=N)?(n+1):(n)):(n);
@@ -79,7 +79,7 @@ package org.flixel;
 		{
 			if(UseGlobalSeed && !Math.isNaN(_seed))
 			{
-				var random:Int = Math.floor(randomize(_seed));
+				var random:Float = randomize(_seed);
 				_seed = mutate(_seed,random);
 				return random;
 			}
@@ -181,9 +181,9 @@ package org.flixel;
 		public static function rotatePoint(X:Float, Y:Float, PivotX:Float, PivotY:Float, Angle:Float,?P:FlxPoint=null):FlxPoint
 		{
 			if(P == null) P = new FlxPoint();
-			var radians:Int = Math.floor(-Angle / 180 * Math.PI);
-			var dx:Int = Math.floor(X-PivotX);
-			var dy:Int = Math.floor(PivotY-Y);
+			var radians:Float = -Angle / 180 * Math.PI;
+			var dx:Float = X-PivotX;
+			var dy:Float = PivotY-Y;
 			P.x = PivotX + Math.cos(radians)*dx - Math.sin(radians)*dy;
 			P.y = PivotY - (Math.sin(radians)*dx + Math.cos(radians)*dy);
 			return P;
@@ -214,7 +214,7 @@ package org.flixel;
 		{
 			var s:String = Type.getClassName(Obj);
 			trace("TODO: makes sure the class name is being parsed correctly.");
-			//s = s.replace("::",".");
+			s = StringTools.replace(s, "::", ".");
 			if(Simple)
 				s = s.substr(s.lastIndexOf(".")+1);
 			return s;
@@ -243,13 +243,13 @@ package org.flixel;
 		 * 
 		 * @return	The altered Velocity value.
 		 */
-		public static function computeVelocity(Velocity:Float, ?Acceleration:Int=0, ?Drag:Int=0, ?Max:Int=10000):Float
+		public static function computeVelocity(Velocity:Float, ?Acceleration:Float=0, ?Drag:Float=0, ?Max:Float=10000):Float
 		{
 			if(Acceleration != 0)
 				Velocity += Acceleration*FlxG.elapsed;
 			else if(Drag != 0)
 			{
-				var d:Int = Math.floor(Drag*FlxG.elapsed);
+				var d:Float = Drag*FlxG.elapsed;
 				if(Velocity - d > 0)
 					Velocity -= d;
 				else if(Velocity + d < 0)
@@ -280,7 +280,7 @@ package org.flixel;
 		 * @param	Height		Desired height of the game world.
 		 * @param	Divisions	Pass a non-zero value to set <code>quadTreeDivisions</code>.  Default value is 3.
 		 */
-		public static function setWorldBounds(?X:Int=0, ?Y:Int=0, ?Width:Int=0, ?Height:Int=0, ?Divisions:Int=3):Void
+		public static function setWorldBounds(?X:Float=0, ?Y:Float=0, ?Width:Float=0, ?Height:Float=0, ?Divisions:Int=3):Void
 		{
 			if(quadTreeBounds == null)
 				quadTreeBounds = new FlxRect();
@@ -355,8 +355,8 @@ package org.flixel;
 		public static function solveXCollision(Object1:FlxObject, Object2:FlxObject):Bool
 		{
 			//Avoid messed up collisions ahead of time
-			var o1:Int = Math.floor(Object1.colVector.x);
-			var o2:Int = Math.floor(Object2.colVector.x);
+			var o1:Float = Object1.colVector.x;
+			var o2:Float = Object2.colVector.x;
 			if(o1 == o2)
 				return false;
 			
@@ -384,8 +384,8 @@ package org.flixel;
 			var i2:Int;
 			var obj1Hull:FlxRect = Object1.colHullX;
 			var obj2Hull:FlxRect = Object2.colHullX;
-			var co1:Array<Dynamic> = Object1.colOffsets;
-			var co2:Array<Dynamic> = Object2.colOffsets;
+			var co1:Array<FlxPoint> = Object1.colOffsets;
+			var co2:Array<FlxPoint> = Object2.colOffsets;
 			var l1:Int = co1.length;
 			var l2:Int = co2.length;
 			var ox1:Float;
@@ -552,8 +552,8 @@ package org.flixel;
 		public static function solveYCollision(Object1:FlxObject, Object2:FlxObject):Bool
 		{
 			//Avoid messed up collisions ahead of time
-			var o1:Int = Math.floor(Object1.colVector.y);
-			var o2:Int = Math.floor(Object2.colVector.y);
+			var o1:Float = Object1.colVector.y;
+			var o2:Float = Object2.colVector.y;
 			if(o1 == o2)
 				return false;
 			
@@ -579,8 +579,8 @@ package org.flixel;
 			var i2:Int;
 			var obj1Hull:FlxRect = Object1.colHullY;
 			var obj2Hull:FlxRect = Object2.colHullY;
-			var co1:Array<Dynamic> = Object1.colOffsets;
-			var co2:Array<Dynamic> = Object2.colOffsets;
+			var co1:Array<FlxPoint> = Object1.colOffsets;
+			var co2:Array<FlxPoint> = Object2.colOffsets;
 			var l1:Int = co1.length;
 			var l2:Int = co2.length;
 			var ox1:Float;

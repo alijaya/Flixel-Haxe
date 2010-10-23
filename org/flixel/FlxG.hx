@@ -1,5 +1,6 @@
 package org.flixel;
 
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Stage;
 	import flash.geom.Matrix;
@@ -122,7 +123,7 @@ package org.flixel;
 		/**
 		 * A list of all the sounds being played in the game.
 		 */
-		public static var sounds:Array<Dynamic>;
+		public static var sounds:Array<FlxSound>;
 		/**
 		 * Internal flag for whether or not the game is muted.
 		 */
@@ -366,7 +367,7 @@ package org.flixel;
 			var sl:Int = sounds.length;
 			var index:Int = -1;
 			for (i in 0 ... sl) {
-				if(!(cast( sounds[i], FlxSound)).active) {
+				if(!sounds[i].active) {
 					break;
 					index = i;
 				}
@@ -640,7 +641,7 @@ package org.flixel;
 		 * 
 		 * @return	The <code>BitmapData</code> we just created.
 		 */
-		public static function addBitmap(Graphic:Class<Dynamic>, ?Reverse:Bool=false, ?Unique:Bool=false, ?Key:String=null):BitmapData
+		public static function addBitmap(Graphic:Class<Bitmap>, ?Reverse:Bool=false, ?Unique:Bool=false, ?Key:String=null):BitmapData
 		{
 			var needReverse:Bool = false;
 			var key:String = Key;
@@ -668,16 +669,22 @@ package org.flixel;
 				needReverse = true;
 			if(needReverse)
 			{
-				var newPixels:BitmapData = new BitmapData(pixels.width<<1,pixels.height,true,0x00000000);
-				newPixels.draw(pixels);
-				var mtx:Matrix = new Matrix();
-				mtx.scale(-1,1);
-				mtx.translate(newPixels.width,0);
-				newPixels.draw(pixels,mtx);
-				pixels = newPixels;
+				pixels = reverseBitmapData(pixels);
 			}
 			return pixels;
 		}
+
+		public static function reverseBitmapData(pixels:BitmapData) : BitmapData
+		{
+			var newPixels:BitmapData = new BitmapData(pixels.width<<1,pixels.height,true,0x00000000);
+			newPixels.draw(pixels);
+			var mtx:Matrix = new Matrix();
+			mtx.scale(-1,1);
+			mtx.translate(newPixels.width,0);
+			newPixels.draw(pixels,mtx);
+			return newPixels;
+		}
+		
 
 		/**
 		 * Tells the camera subsystem what <code>FlxCore</code> object to follow.
@@ -685,7 +692,7 @@ package org.flixel;
 		 * @param	Target		The object to follow.
 		 * @param	Lerp		How much lag the camera should have (can help smooth out the camera movement).
 		 */
-		public static function follow(Target:FlxObject, ?Lerp:Int=1):Void
+		public static function follow(Target:FlxObject, ?Lerp:Float=1):Void
 		{
 			followTarget = Target;
 			followLerp = Lerp;
@@ -703,7 +710,7 @@ package org.flixel;
 		 * @param	LeadX		Percentage of X velocity to add to the camera's motion.
 		 * @param	LeadY		Percentage of Y velocity to add to the camera's motion.
 		 */
-		public static function followAdjust(?LeadX:Int = 0, ?LeadY:Int = 0):Void
+		public static function followAdjust(?LeadX:Float = 0, ?LeadY:Float = 0):Void
 		{
 			followLead = new Point(LeadX,LeadY);
 		}
