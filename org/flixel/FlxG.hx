@@ -669,16 +669,22 @@ package org.flixel;
 				needReverse = true;
 			if(needReverse)
 			{
-				var newPixels:BitmapData = new BitmapData(pixels.width<<1,pixels.height,true,0x00000000);
-				newPixels.draw(pixels);
-				var mtx:Matrix = new Matrix();
-				mtx.scale(-1,1);
-				mtx.translate(newPixels.width,0);
-				newPixels.draw(pixels,mtx);
-				pixels = newPixels;
+				pixels = reverseBitmapData(pixels);
 			}
 			return pixels;
 		}
+
+		public static function reverseBitmapData(pixels:BitmapData) : BitmapData
+		{
+			var newPixels:BitmapData = new BitmapData(pixels.width<<1,pixels.height,true,0x00000000);
+			newPixels.draw(pixels);
+			var mtx:Matrix = new Matrix();
+			mtx.scale(-1,1);
+			mtx.translate(newPixels.width,0);
+			newPixels.draw(pixels,mtx);
+			return newPixels;
+		}
+		
 
 		/**
 		 * Tells the camera subsystem what <code>FlxCore</code> object to follow.

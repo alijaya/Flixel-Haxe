@@ -21,13 +21,13 @@ package org.flixel.data;
 	 */
 	class FlxPanel extends FlxObject {
 		
-		/*[Embed(source="donate.png")]*/ var ImgDonate:Class<Bitmap>;
-		/*[Embed(source="stumble.png")]*/ var ImgStumble:Class<Bitmap>;
-		/*[Embed(source="digg.png")]*/ var ImgDigg:Class<Bitmap>;
-		/*[Embed(source="reddit.png")]*/ var ImgReddit:Class<Bitmap>;
-		/*[Embed(source="delicious.png")]*/ var ImgDelicious:Class<Bitmap>;
-		/*[Embed(source="twitter.png")]*/ var ImgTwitter:Class<Bitmap>;
-		/*[Embed(source="close.png")]*/ var ImgClose:Class<Bitmap>;
+		/*[Embed(source="donate.png")]*/ //var ImgDonate:Class<Bitmap>;
+		/*[Embed(source="stumble.png")]*/ //var ImgStumble:Class<Bitmap>;
+		/*[Embed(source="digg.png")]*/ //var ImgDigg:Class<Bitmap>;
+		/*[Embed(source="reddit.png")]*/ //var ImgReddit:Class<Bitmap>;
+		/*[Embed(source="delicious.png")]*/ //var ImgDelicious:Class<Bitmap>;
+		/*[Embed(source="twitter.png")]*/ //var ImgTwitter:Class<Bitmap>;
+		/*[Embed(source="close.png")]*/ //var ImgClose:Class<Bitmap>;
 
 		/**
 		 * @private
@@ -114,6 +114,8 @@ package org.flixel.data;
 		public function new()
 		{
 			super();
+			var r = ressy.Ressy.instance;
+			var s:FlxSprite;
 			y = -21;
 			_ty = y;
 			_closed = false;
@@ -131,27 +133,39 @@ package org.flixel.data;
 			_bottomBar.scrollFactor.x = 0;
 			_bottomBar.scrollFactor.y = 0;
 			_donate = new FlxButton(3,0,onDonate);
-			_donate.loadGraphic(new FlxSprite(0,0,ImgDonate));
+			s = new FlxSprite(0,0);
+			s.loadGraphicIns(r.getStr("flixel.donate").bitmapData);
+			_donate.loadGraphic(s);
 			_donate.scrollFactor.x = 0;
 			_donate.scrollFactor.y = 0;
 			_stumble = new FlxButton(Math.floor(FlxG.width/2-6-13-6-13-6),0,onStumble);
-			_stumble.loadGraphic(new FlxSprite(0,0,ImgStumble));
+			s = new FlxSprite(0,0);
+			s.loadGraphicIns(r.getStr("flixel.stumble").bitmapData);
+			_stumble.loadGraphic(s);
 			_stumble.scrollFactor.x = 0;
 			_stumble.scrollFactor.y = 0;
 			_digg = new FlxButton(Math.floor(FlxG.width/2-6-13-6),0,onDigg);
-			_digg.loadGraphic(new FlxSprite(0,0,ImgDigg));
+			s = new FlxSprite(0,0);
+			s.loadGraphicIns(r.getStr("flixel.digg").bitmapData);
+			_digg.loadGraphic(s);
 			_digg.scrollFactor.x = 0;
 			_digg.scrollFactor.y = 0;
 			_reddit = new FlxButton(Math.floor(FlxG.width/2-6),0,onReddit);
-			_reddit.loadGraphic(new FlxSprite(0,0,ImgReddit));
+			s = new FlxSprite(0,0);
+			s.loadGraphicIns(r.getStr("flixel.reddit").bitmapData);
+			_reddit.loadGraphic(s);
 			_reddit.scrollFactor.x = 0;
 			_reddit.scrollFactor.y = 0;
 			_delicious = new FlxButton(Math.floor(FlxG.width/2+7+6),0,onDelicious);
-			_delicious.loadGraphic(new FlxSprite(0,0,ImgDelicious));
+			s = new FlxSprite(0,0);
+			s.loadGraphicIns(r.getStr("flixel.delicious").bitmapData);
+			_delicious.loadGraphic(s);
 			_delicious.scrollFactor.x = 0;
 			_delicious.scrollFactor.y = 0;
 			_twitter = new FlxButton(Math.floor(FlxG.width/2+7+6+12+6),0,onTwitter);
-			_twitter.loadGraphic(new FlxSprite(0,0,ImgTwitter));
+			s = new FlxSprite(0,0);
+			s.loadGraphicIns(r.getStr("flixel.twitter").bitmapData);
+			_twitter.loadGraphic(s);
 			_twitter.scrollFactor.x = 0;
 			_twitter.scrollFactor.y = 0;
 			_caption = new FlxText(Math.floor(FlxG.width/2),0,Math.floor(FlxG.width/2-19),"");
@@ -159,7 +173,9 @@ package org.flixel.data;
 			_caption.scrollFactor.x = 0;
 			_caption.scrollFactor.y = 0;
 			_close = new FlxButton(Math.floor(FlxG.width-16),0,onClose);
-			_close.loadGraphic(new FlxSprite(0,0,ImgClose));
+			s = new FlxSprite(0,0);
+			s.loadGraphicIns(r.getStr("flixel.close").bitmapData);
+			_close.loadGraphic(s);
 			_close.scrollFactor.x = 0;
 			_close.scrollFactor.y = 0;
 			hide();
@@ -289,7 +305,7 @@ package org.flixel.data;
 			_caption.reset(_caption.x,y+4);
 			_close.reset(_close.x,y+4);
 			#if flash9
-			if(!FlxG.mouse.cursor.visible)
+			if(FlxG.mouse.cursor == null || !FlxG.mouse.cursor.visible)
 				Mouse.show();
 			#end
 			visible = true;

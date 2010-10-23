@@ -193,6 +193,49 @@ import flash.display.Bitmap;
 			resetHelpers();
 			return this;
 		}
+
+		/**
+		 * Load an image from an embedded graphic file.
+		 * 
+		 * @param	GraphicIns		The image you want to use.
+		 * @param	Animated	Whether the Graphic parameter is a single sprite or a row of sprites.
+		 * @param	Reverse		Whether you need this class to generate horizontally flipped versions of the animation frames.
+		 * @param	Width		OPTIONAL - Specify the width of your sprite (helps FlxSprite figure out what to do with non-square sprites or sprite sheets).
+		 * @param	Height		OPTIONAL - Specify the height of your sprite (helps FlxSprite figure out what to do with non-square sprites or sprite sheets).
+		 * 
+		 * @return	This FlxSprite instance (nice for chaining stuff together, if you're into that).
+		 */
+		public function loadGraphicIns(GraphicIns:BitmapData, ?Animated:Bool=false,?Reverse:Bool=false,?Width:Int=0,?Height:Int=0):FlxSprite
+		{
+			_bakedRotation = 0;
+			_pixels = (Reverse)? FlxG.reverseBitmapData(GraphicIns) : GraphicIns;
+			//TEMP NOTE: bitmap loads correctly up to this point at least
+			
+			if(Reverse)
+				_flipped = _pixels.width>>1;
+			else
+				_flipped = 0;
+			if(Width == 0)
+			{
+				if(Animated)
+					Width = _pixels.height;
+				else if(_flipped > 0)
+					Width = Math.floor(_pixels.width/2);
+				else
+					Width = Math.floor(_pixels.width);
+			}
+			width = frameWidth = Width;
+			if(Height == 0)
+			{
+				if(Animated)
+					Height = Math.floor(width);
+				else
+					Height = Math.floor(_pixels.height);
+			}
+			height = frameHeight = Height;
+			resetHelpers();
+			return this;
+		}
 		
 		/**
 		 * Create a pre-rotated sprite sheet from a simple sprite.

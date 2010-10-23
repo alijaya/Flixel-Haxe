@@ -14,8 +14,8 @@ package org.flixel;
 	 */
 	class FlxTilemap extends FlxObject {
 
-		/*[Embed(source="data/autotiles.png")]*/ public static var ImgAuto:Class<Bitmap>;
-		/*[Embed(source="data/autotiles_alt.png")]*/ public static var ImgAutoAlt:Class<Bitmap>;
+		/*[Embed(source="data/autotiles.png")]*/ //public static var ImgAuto:Class<Bitmap>;
+		/*[Embed(source="data/autotiles_alt.png")]*/ //public static var ImgAutoAlt:Class<Bitmap>;
 		
 		/**
 		 * No auto-tiling.
