@@ -1,5 +1,6 @@
 package org.flixel;
 
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.geom.Rectangle;
 	
@@ -19,7 +20,7 @@ package org.flixel;
 		/**
 		 * Array of rectangles used to quickly blit the tiles to the screen.
 		 */
-		var _rects:Array<Dynamic>;
+		var _rects:Array<Rectangle>;
 		/**
 		 * The size of the tiles (e.g. 8 means 8x8).
 		 */
@@ -59,7 +60,7 @@ package org.flixel;
 		 * @param	TileGraphic The graphic class that contains the tiles that should fill this block.
 		 * @param	Empties		The number of "empty" tiles to add to the auto-fill algorithm (e.g. 8 tiles + 4 empties = 1/3 of block will be open holes).
 		 */
-		public function loadGraphic(TileGraphic:Class<Dynamic>,?Empties:Int=0):Void
+		public function loadGraphic(TileGraphic:Class<Bitmap>,?Empties:Int=0):Void
 		{
 			if(TileGraphic == null)
 				return;
@@ -72,7 +73,7 @@ package org.flixel;
 			width = widthInTiles*_tileSize;
 			height = heightInTiles*_tileSize;
 			var numTiles:Int = widthInTiles*heightInTiles;
-			var numGraphics:Int = _pixels.width/_tileSize;
+			var numGraphics:Int = Math.floor(_pixels.width/_tileSize);
 			for(i in 0...numTiles)
 			{
 				if(FlxU.random()*(numGraphics+Empties) > Empties)
@@ -96,7 +97,7 @@ package org.flixel;
 		function renderBlock():Void
 		{
 			getScreenXY(_point);
-			var opx:Int = _point.x;
+			var opx:Int = Math.floor(_point.x);
 			var rl:Int = _rects.length;
 			_flashPoint.x = _point.x;
 			_flashPoint.y = _point.y;
