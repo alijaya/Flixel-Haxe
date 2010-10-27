@@ -1,17 +1,20 @@
 package org.flixel;
 
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.BlendMode;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
 	import org.flixel.data.FlxAnim;
-import flash.display.Bitmap;
 	
 	#if flash9
 	import flash.display.BlendMode;
 	#end
+
+	import ressy.Ressy;
 	
 	/**
 	* The main "game object" class, handles basic physics and animation.
@@ -63,7 +66,7 @@ import flash.display.Bitmap;
 		 * E.g. "multiply", "screen", etc.
 		 * @default null
 		 */
-		public var blend:String;
+		public var blend:BlendMode;
 		/**
 		 * Controls whether the object is smoothed when rotated, affects performance.
 		 * @default false
@@ -236,6 +239,22 @@ import flash.display.Bitmap;
 			resetHelpers();
 			return this;
 		}
+
+		/**
+		 * Load an image from an embedded graphic file.
+		 * 
+		 * @param	Graphic		The image you want to use.
+		 * @param	Animated	Whether the Graphic parameter is a single sprite or a row of sprites.
+		 * @param	Reverse		Whether you need this class to generate horizontally flipped versions of the animation frames.
+		 * @param	Width		OPTIONAL - Specify the width of your sprite (helps FlxSprite figure out what to do with non-square sprites or sprite sheets).
+		 * @param	Height		OPTIONAL - Specify the height of your sprite (helps FlxSprite figure out what to do with non-square sprites or sprite sheets).
+		 * 
+		 * @return	This FlxSprite instance (nice for chaining stuff together, if you're into that).
+		 */
+		public function loadGraphicRessy(Graphic:String, ?Animated:Bool=false,?Reverse:Bool=false,?Width:Int=0,?Height:Int=0):FlxSprite
+		{
+			return loadGraphicIns(Ressy.instance.getStr(Graphic).bitmapData, Animated, Reverse, Width, Height);
+		}
 		
 		/**
 		 * Create a pre-rotated sprite sheet from a simple sprite.
@@ -316,6 +335,103 @@ import flash.display.Bitmap;
 			width = height = frameWidth = frameHeight = max;
 			resetHelpers();
 			return this;
+		}
+
+		/**
+		 * Create a pre-rotated sprite sheet from a simple sprite.
+		 * This can make a huge difference in graphical performance!
+		 * 
+		 * @param	GraphicIns			The image you want to rotate & stamp.
+		 * @param	Frames			The number of frames you want to use (more == smoother rotations).
+		 * @param	Offset			Use this to select a specific frame to draw from the graphic.
+		 * @param	AntiAliasing	Whether to use high quality rotations when creating the graphic.
+		 * @param	AutoBuffer		Whether to automatically increase the image size to accomodate rotated corners.
+		 * 
+		 * @return	This FlxSprite instance (nice for chaining stuff together, if you're into that).
+		 */
+		public function loadRotatedGraphicIns(GraphicIns:BitmapData, ?Rotations:Int=16, ?Frame:Int=-1, ?AntiAliasing:Bool=false, ?AutoBuffer:Bool=false):FlxSprite
+		{
+			//Create the brush and canvas
+			var rows:Int = Math.floor(Math.sqrt(Rotations));
+			var brush:BitmapData = GraphicIns;
+			if(Frame >= 0)
+			{
+				//Using just a segment of the graphic - find the right bit here
+				var full:BitmapData = brush;
+				brush = new BitmapData(full.height,full.height);
+				var rx:Int = Frame*brush.width;
+				var ry:Int = 0;
+				var fw:Int = full.width;
+				if(rx >= fw)
+				{
+					ry = Math.floor(rx/fw)*brush.height;
+					rx %= fw;
+				}
+				_flashRect.x = rx;
+				_flashRect.y = ry;
+				_flashRect.width = brush.width;
+				_flashRect.height = brush.height;
+				brush.copyPixels(full,_flashRect,_flashPointZero);
+			}
+			
+			var max:Int = brush.width;
+			if(brush.height > max)
+				max = brush.height;
+			if(AutoBuffer)
+				max = Math.floor(max * 1.5);
+			var cols:Int = Math.floor(FlxU.ceil(Rotations/rows));
+			width = max*cols;
+			height = max*rows;
+			var skipGen:Bool = false;
+			_pixels = FlxG.createBitmap(Math.floor(width), Math.floor(height), 0, true);
+			width = frameWidth = _pixels.width;
+			height = frameHeight = _pixels.height;
+			_bakedRotation = 360/Rotations;
+			
+			//Generate a new sheet if necessary, then fix up the width & height
+			if(!skipGen)
+			{
+				var r:Int;
+				var c:Int;
+				var ba:Float = 0;
+				var bw2:Int = Math.floor(brush.width/2);
+				var bh2:Int = Math.floor(brush.height/2);
+				var gxc:Int = Math.floor(max/2);
+				var gyc:Int = Math.floor(max/2);
+				for(r in 0...rows)
+				{
+					for(c in 0...cols)
+					{
+						_mtx.identity();
+						_mtx.translate(-bw2,-bh2);
+						_mtx.rotate(Math.PI * 2 * (ba / 360));
+						_mtx.translate(max*c+gxc, gyc);
+						ba += _bakedRotation;
+						_pixels.draw(brush,_mtx,null,null,null,AntiAliasing);
+					}
+					gyc += max;
+				}
+			}
+			width = height = frameWidth = frameHeight = max;
+			resetHelpers();
+			return this;
+		}
+		
+		/**
+		 * Create a pre-rotated sprite sheet from a simple sprite.
+		 * This can make a huge difference in graphical performance!
+		 * 
+		 * @param	Graphic			The image you want to rotate & stamp.
+		 * @param	Frames			The number of frames you want to use (more == smoother rotations).
+		 * @param	Offset			Use this to select a specific frame to draw from the graphic.
+		 * @param	AntiAliasing	Whether to use high quality rotations when creating the graphic.
+		 * @param	AutoBuffer		Whether to automatically increase the image size to accomodate rotated corners.
+		 * 
+		 * @return	This FlxSprite instance (nice for chaining stuff together, if you're into that).
+		 */
+		public function loadRotatedGraphicRessy(Graphic:String, ?Rotations:Int=16, ?Frame:Int=-1, ?AntiAliasing:Bool=false, ?AutoBuffer:Bool=false):FlxSprite
+		{
+			return loadRotatedGraphicIns(Ressy.instance.getStr(Graphic).bitmapData, Rotations, Frame, AntiAliasing, AutoBuffer);
 		}
 		
 		/**
@@ -610,11 +726,9 @@ import flash.display.Bitmap;
 			_mtx.scale(scale.x,scale.y);
 			if(angle != 0) _mtx.rotate(Math.PI * 2 * (angle / 360));
 			_mtx.translate(_point.x+origin.x,_point.y+origin.y);
-			#if flash9
-			var blendMode:BlendMode = cast(blend, BlendMode);
-			#else
-			var blendMode:String = blend;
-			#end
+			
+			var blendMode:BlendMode = blend;
+			
 			FlxG.buffer.draw(_framePixels,_mtx,null,blendMode,null,antialiasing);
 		}
 		

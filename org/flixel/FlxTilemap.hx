@@ -5,6 +5,8 @@ package org.flixel;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 
+	import ressy.Ressy;
+
 	/**
 	 * This is a traditional tilemap display and collision class.
 	 * It takes a string of comma-separated numbers and then associates
@@ -180,6 +182,98 @@ package org.flixel;
 		}
 		
 		/**
+		 * Load the tilemap with string data and a tile graphic.
+		 * 
+		 * @param	MapData			A string of comma and line-return delineated indices indicating what order the tiles should go in.
+		 * @param	TileGraphicIns		All the tiles you want to use, arranged in a strip corresponding to the numbers in MapData.
+		 * @param	TileWidth		The width of your tiles (e.g. 8) - defaults to height of the tile graphic if unspecified.
+		 * @param	TileHeight		The height of your tiles (e.g. 8) - defaults to width if unspecified.
+		 * 
+		 * @return	A pointer this instance of FlxTilemap, for chaining as usual :)
+		 */
+		public function loadMapIns(MapData:String, TileGraphicIns:BitmapData, ?TileWidth:Int=0, ?TileHeight:Int=0):FlxTilemap
+		{
+			//Figure out the map dimensions based on the data string
+			var c:Int;
+			var cols:Array<String>;
+			var rows:Array<String> = MapData.split("\n");
+			heightInTiles = rows.length;
+			_data = new Array();
+			for(r in 0...heightInTiles)
+			{
+				cols = rows[r].split(",");
+				if(cols.length <= 1)
+				{
+					heightInTiles--;
+					continue;
+				}
+				if(widthInTiles == 0)
+					widthInTiles = cols.length;
+				for(c in 0...widthInTiles)
+				{
+					_data.push(Std.parseInt(cols[c]));
+				}
+			}
+			
+			//Pre-process the map data if it's auto-tiled
+			var i:Int;
+			totalTiles = widthInTiles*heightInTiles;
+			if(auto > OFF)
+			{
+				collideIndex = startingIndex = drawIndex = 1;
+				for(i in 0...totalTiles)
+					autoTile(i);
+			}
+
+			//Figure out the size of the tiles
+			_pixels = TileGraphicIns;
+			_tileWidth = TileWidth;
+			if(_tileWidth == 0)
+				_tileWidth = _pixels.height;
+			_tileHeight = TileHeight;
+			if(_tileHeight == 0)
+				_tileHeight = _tileWidth;
+			_block.width = _tileWidth;
+			_block.height = _tileHeight;
+			
+			//Then go through and create the actual map
+			width = widthInTiles*_tileWidth;
+			height = heightInTiles*_tileHeight;
+			_rects = new Array();
+			for(i in 0...totalTiles)
+				updateTile(i);
+
+			//Pre-set some helper variables for later
+			_screenRows = Math.ceil(FlxG.height/_tileHeight)+1;
+			if(_screenRows > heightInTiles)
+				_screenRows = heightInTiles;
+			_screenCols = Math.ceil(FlxG.width/_tileWidth)+1;
+			if(_screenCols > widthInTiles)
+				_screenCols = widthInTiles;
+			
+			_bbKey = null; // TODO
+			generateBoundingTilesIns();
+			refreshHulls();
+			
+			return this;
+		}
+		
+		/**
+		 * Load the tilemap with string data and a tile graphic.
+		 * 
+		 * @param	MapData			A string of comma and line-return delineated indices indicating what order the tiles should go in.
+		 * @param	TileGraphic		All the tiles you want to use, arranged in a strip corresponding to the numbers in MapData.
+		 * @param	TileWidth		The width of your tiles (e.g. 8) - defaults to height of the tile graphic if unspecified.
+		 * @param	TileHeight		The height of your tiles (e.g. 8) - defaults to width if unspecified.
+		 * 
+		 * @return	A pointer this instance of FlxTilemap, for chaining as usual :)
+		 */
+		public function loadMapRessy(MapData:String, TileGraphic:String, ?TileWidth:Int=0, ?TileHeight:Int=0):FlxTilemap
+		{
+			return loadMapIns(MapData, Ressy.instance.getStr(TileGraphic).bitmapData, TileWidth, TileHeight);
+		}
+		
+		/**
 		 * Generates a bounding box version of the tiles, flixel should call this automatically when necessary.
 		 */
 		function generateBoundingTiles():Void
@@ -265,6 +359,82 @@ package org.flixel;
 					r += _tileHeight;
 				}
 			}
+		}
+		
+		/**
+		 * Generates a bounding box version of the tiles, flixel should call this automatically when necessary.
+		 */
+		function generateBoundingTilesIns():Void
+		{
+			//Check for an existing version of this bounding boxes tilemap
+			var bbc:Int = getBoundingColor();
+			_bbPixels = FlxG.createBitmap(_pixels.width, _pixels.height, 0, true);
+			
+				//Generate a bounding boxes tilemap for this color
+				_flashRect = new Rectangle();
+				_flashRect.width = _pixels.width;
+				_flashRect.height = _pixels.height;
+				_flashPoint.x = 0;
+				_flashPoint.y = 0;
+				
+				_bbPixels.copyPixels(_pixels,_flashRect,_flashPoint);
+				_flashRect.width = _tileWidth;
+				_flashRect.height = _tileHeight;
+				
+				//Check for an existing non-collide bounding box stamp
+				var ov:Bool = _solid;
+				_solid = false;
+				bbc = getBoundingColor();
+				var stamp1:BitmapData = FlxG.createBitmap(_tileWidth, _tileHeight, 0, true);
+				
+					//Generate a bounding boxes stamp for this color
+					stamp1.fillRect(_flashRect,bbc);
+					_flashRect.x = _flashRect.y = 1;
+					_flashRect.width -= 2;
+					_flashRect.height -= 2;
+					stamp1.fillRect(_flashRect,0);
+					_flashRect.x = _flashRect.y = 0;
+					_flashRect.width = _tileWidth;
+					_flashRect.height = _tileHeight;
+				
+				_solid = ov;
+				
+				//Check for an existing collide bounding box
+				bbc = getBoundingColor();
+				var stamp2:BitmapData = FlxG.createBitmap(_tileWidth, _tileHeight, 0, true);
+				
+					//Generate a bounding boxes stamp for this color
+					stamp2.fillRect(_flashRect,bbc);
+					_flashRect.x = _flashRect.y = 1;
+					_flashRect.width -= 2;
+					_flashRect.height -= 2;
+					stamp2.fillRect(_flashRect,0);
+					_flashRect.x = _flashRect.y = 0;
+					_flashRect.width = _tileWidth;
+					_flashRect.height = _tileHeight;
+					
+				
+				//Stamp the new tile bitmap with the bounding box border
+				var r:Int;
+				var c:Int;
+				var i:Int = 0;
+				r = 0;
+				while (r < _bbPixels.height)
+				{
+					c = 0;
+					while (c < _bbPixels.width)
+					{
+						_flashPoint.x = c;
+						_flashPoint.y = r;
+						if(i++ < collideIndex)
+							_bbPixels.copyPixels(stamp1,_flashRect,_flashPoint,null,null,true);
+						else
+							_bbPixels.copyPixels(stamp2,_flashRect,_flashPoint,null,null,true);
+						c += _tileWidth;
+					}
+					r += _tileHeight;
+				}
+			
 		}
 		
 		/**

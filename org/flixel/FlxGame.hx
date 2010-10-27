@@ -18,6 +18,8 @@ import flash.Lib;
 import org.flixel.data.FlxConsole;
 import org.flixel.data.FlxPause;
 
+import ressy.Ressy;
+
 #if flash9
 import flash.text.AntiAliasType;
 import flash.text.GridFitType;
@@ -100,6 +102,9 @@ class FlxGame extends Sprite {
 	public function new(GameSizeX:Int,GameSizeY:Int,InitialState:Class<FlxState>,?Zoom:Int=2)
 	{
 		super();
+
+		var r = Ressy.instance;
+		r.registerFont(r.getStr("flixel.system"), "system");
 		
 		#if flash9
 		flash.ui.Mouse.hide();

@@ -3,6 +3,8 @@ package org.flixel;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.geom.Rectangle;
+
+	import ressy.Ressy;
 	
 	/**
 	 * This is the basic "environment object" class, used to create simple walls and floors.
@@ -81,6 +83,46 @@ package org.flixel;
 				else
 					_rects.push(null);
 			}
+		}
+		
+		/**
+		 * Fills the block with a randomly arranged selection of graphics from the image provided.
+		 * 
+		 * @param	TileGraphicIns The graphic class that contains the tiles that should fill this block.
+		 * @param	Empties		The number of "empty" tiles to add to the auto-fill algorithm (e.g. 8 tiles + 4 empties = 1/3 of block will be open holes).
+		 */
+		public function loadGraphicIns(TileGraphicIns:BitmapData,?Empties:Int=0):Void
+		{
+			if(TileGraphicIns == null)
+				return;
+
+			_pixels = TileGraphicIns;
+			_rects = new Array();
+			_tileSize = _pixels.height;
+			var widthInTiles:Int = Math.ceil(width/_tileSize);
+			var heightInTiles:Int = Math.ceil(height/_tileSize);
+			width = widthInTiles*_tileSize;
+			height = heightInTiles*_tileSize;
+			var numTiles:Int = widthInTiles*heightInTiles;
+			var numGraphics:Int = Math.floor(_pixels.width/_tileSize);
+			for(i in 0...numTiles)
+			{
+				if(FlxU.random()*(numGraphics+Empties) > Empties)
+					_rects.push(new Rectangle(_tileSize*Math.floor(FlxU.random()*numGraphics),0,_tileSize,_tileSize));
+				else
+					_rects.push(null);
+			}
+		}
+		
+		/**
+		 * Fills the block with a randomly arranged selection of graphics from the image provided.
+		 * 
+		 * @param	TileGraphic The graphic class that contains the tiles that should fill this block.
+		 * @param	Empties		The number of "empty" tiles to add to the auto-fill algorithm (e.g. 8 tiles + 4 empties = 1/3 of block will be open holes).
+		 */
+		public function loadGraphicRessy(TileGraphic:String,?Empties:Int=0):Void
+		{
+			loadGraphicIns(Ressy.instance.getStr(TileGraphic).bitmapData, Empties);
 		}
 		
 		/**

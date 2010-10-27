@@ -1,6 +1,9 @@
 package org.flixel;
 
 import flash.display.Bitmap;
+import flash.display.BitmapData;
+
+import ressy.Ressy;
 
 /**
  * <code>FlxEmitter</code> is a lightweight particle emitter.
@@ -172,6 +175,87 @@ class FlxEmitter extends FlxGroup {
 			add(s);
 		}
 		return this;
+	}
+	
+	/**
+	 * This function generates a new array of sprites to attach to the emitter.
+	 * 
+	 * @param	GraphicsIns		If you opted to not pre-configure an array of FlxSprite objects, you can simply pass in a particle image or sprite sheet.
+	 * @param	Quantity		The number of particles to generate when using the "create from image" option.
+	 * @param	BakedRotations	How many frames of baked rotation to use (boosts performance).  Set to zero to not use baked rotations.
+	 * @param	Multiple		Whether the image in the Graphics param is a single particle or a bunch of particles (if it's a bunch, they need to be square!).
+	 * @param	Collide			Whether the particles should be flagged as not 'dead' (non-colliding particles are higher performance).  0 means no collisions, 0-1 controls scale of particle's bounding box.
+	 * 
+	 * @return	This FlxEmitter instance (nice for chaining stuff together, if you're into that).
+	 */
+	public function createSpritesIns(GraphicsIns:BitmapData, ?Quantity:Int=50, ?BakedRotations:Int=16, ?Multiple:Bool=true, ?Collide:Float=0):FlxEmitter
+	{
+		members = new Array();
+		var r:Int;
+		var s:FlxSprite;
+		var tf:Int = 1;
+		var sw:Float;
+		var sh:Float;
+		if(Multiple)
+		{
+			s = new FlxSprite(0,0);
+			s.loadGraphicIns(GraphicsIns);
+			tf = Math.floor(s.width/s.height);
+		}
+		for(i in 0...Quantity)
+		{
+			s = new FlxSprite();
+			if(Multiple)
+			{
+				r = Math.floor(FlxU.random()*tf);
+				if(BakedRotations > 0)
+					s.loadRotatedGraphicIns(GraphicsIns,BakedRotations,r);
+				else
+				{
+					s.loadGraphicIns(GraphicsIns,true);
+					s.frame = r;
+				}
+			}
+			else
+			{
+				if(BakedRotations > 0)
+					s.loadRotatedGraphicIns(GraphicsIns,BakedRotations);
+				else
+					s.loadGraphicIns(GraphicsIns);
+			}
+			if(Collide > 0)
+			{
+				sw = s.width;
+				sh = s.height;
+				s.width *= Collide;
+				s.height *= Collide;
+				s.offset.x = (sw-s.width)/2;
+				s.offset.y = (sh-s.height)/2;
+				s.solid = true;
+			}
+			else
+				s.solid = false;
+			s.exists = false;
+			s.scrollFactor = scrollFactor;
+			add(s);
+		}
+		return this;
+	}
+
+	/**
+	 * This function generates a new array of sprites to attach to the emitter.
+	 * 
+	 * @param	Graphics		If you opted to not pre-configure an array of FlxSprite objects, you can simply pass in a particle image or sprite sheet.
+	 * @param	Quantity		The number of particles to generate when using the "create from image" option.
+	 * @param	BakedRotations	How many frames of baked rotation to use (boosts performance).  Set to zero to not use baked rotations.
+	 * @param	Multiple		Whether the image in the Graphics param is a single particle or a bunch of particles (if it's a bunch, they need to be square!).
+	 * @param	Collide			Whether the particles should be flagged as not 'dead' (non-colliding particles are higher performance).  0 means no collisions, 0-1 controls scale of particle's bounding box.
+	 * 
+	 * @return	This FlxEmitter instance (nice for chaining stuff together, if you're into that).
+	 */
+	public function createSpritesRessy(Graphics:String, ?Quantity:Int=50, ?BakedRotations:Int=16, ?Multiple:Bool=true, ?Collide:Float=0):FlxEmitter
+	{
+		return createSpritesIns(Ressy.instance.getStr(Graphics).bitmapData, Quantity, BakedRotations, Multiple, Collide);
 	}
 	
 	/**
