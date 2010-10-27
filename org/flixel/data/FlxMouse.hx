@@ -7,6 +7,8 @@ package org.flixel.data;
 	import org.flixel.FlxPoint;
 	import org.flixel.FlxSprite;
 	import org.flixel.FlxU;
+
+	import ressy.Ressy;
 	
 	/**
 	 * This class helps contain and track the mouse pointer in your game.
@@ -90,19 +92,31 @@ package org.flixel.data;
 		/**
 		 * Either show an existing cursor or load a new one.
 		 * 
-		 * @param	Graphic		The image you want to use for the cursor.
+		 * @param	GraphicIns		The image you want to use for the cursor.
 		 * @param	XOffset		The number of pixels between the mouse's screen position and the graphic's top left corner.
 		 * * @param	YOffset		The number of pixels between the mouse's screen position and the graphic's top left corner. 
 		 */
-		public function showIns(?Graphic:BitmapData=null,?XOffset:Int=0,?YOffset:Int=0):Void
+		public function showIns(?GraphicIns:BitmapData=null,?XOffset:Int=0,?YOffset:Int=0):Void
 		{
 			_out = true;
-			if(Graphic != null)
-				loadIns(Graphic,XOffset,YOffset);
+			if(GraphicIns != null)
+				loadIns(GraphicIns,XOffset,YOffset);
 			else if(cursor != null)
 				cursor.visible = true;
 			else
 				loadIns(null);
+		}
+		
+		/**
+		 * Either show an existing cursor or load a new one.
+		 * 
+		 * @param	Graphic		The image you want to use for the cursor.
+		 * @param	XOffset		The number of pixels between the mouse's screen position and the graphic's top left corner.
+		 * * @param	YOffset		The number of pixels between the mouse's screen position and the graphic's top left corner. 
+		 */
+		public function showRessy(?Graphic:String=null,?XOffset:Int=0,?YOffset:Int=0):Void
+		{
+			showIns((Graphic==null)? null : Ressy.instance.getStr(Graphic).bitmapData, XOffset, YOffset);
 		}
 		
 		/**
@@ -139,20 +153,32 @@ package org.flixel.data;
 		/**
 		 * Load a new mouse cursor graphic
 		 * 
-		 * @param	Graphic		The image you want to use for the cursor.
+		 * @param	GraphicIns		The image you want to use for the cursor.
 		 * @param	XOffset		The number of pixels between the mouse's screen position and the graphic's top left corner.
 		 * * @param	YOffset		The number of pixels between the mouse's screen position and the graphic's top left corner. 
 		 */
-		public function loadIns(Graphic:BitmapData,?XOffset:Int=0,?YOffset:Int=0):Void
+		public function loadIns(GraphicIns:BitmapData,?XOffset:Int=0,?YOffset:Int=0):Void
 		{
-			if(Graphic == null)
-				Graphic = _defaultCursor;
+			if(GraphicIns == null)
+				GraphicIns = _defaultCursor;
 			cursor = new FlxSprite(screenX,screenY);
-			cursor.loadGraphicIns(Graphic);
+			cursor.loadGraphicIns(GraphicIns);
 			cursor.offset.x = XOffset;
 			cursor.offset.y = YOffset;
 		}
 		
+		/**
+		 * Load a new mouse cursor graphic
+		 * 
+		 * @param	Graphic		The image you want to use for the cursor.
+		 * @param	XOffset		The number of pixels between the mouse's screen position and the graphic's top left corner.
+		 * * @param	YOffset		The number of pixels between the mouse's screen position and the graphic's top left corner. 
+		 */
+		public function loadRessy(Graphic:String,?XOffset:Int=0,?YOffset:Int=0):Void
+		{
+			loadIns(Ressy.instance.getStr(Graphic).bitmapData, XOffset, YOffset);
+		}
+
 		/**
 		 * Unload the current cursor graphic.  If the current cursor is visible,
 		 * then the default system cursor is loaded up to replace the old one.
